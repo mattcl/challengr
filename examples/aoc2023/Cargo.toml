@@ -1,0 +1,23 @@
+[package]
+name = "aoc2023"
+version = "0.1.0"
+description = "An unofficial input generator for advent of code 2023."
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "aoc2023-input"
+path = "src/main.rs"
+
+
+[dependencies]
+anyhow = "1.0.79"
+clap = { version = "4.4", features = ["cargo", "derive", "env", "wrap_help"] }
+itertools = { workspace = true }
+proliferatr = { version = "0.1", path = "../../proliferatr" }
+rand = { workspace = true }
+rustc-hash = "1.1.0"
+thiserror = { workspace = true }

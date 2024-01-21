@@ -1,6 +1,7 @@
 [package]
 name = "proliferatr"
 version = "0.1.0"
+description = "A collection of traits/structs to aid in generating input data for solution-oriented programming challenges."
 authors.workspace = true
 edition.workspace = true
 rust-version.workspace = true

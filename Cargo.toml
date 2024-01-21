@@ -2,6 +2,9 @@
 resolver = "2"
 members = [
     "proliferatr",
+
+    # https://github.com/rust-lang/cargo/issues/7467#issuecomment-1162137096
+    "examples/*",
 ]
 
 [workspace.package]
@@ -9,6 +12,7 @@ authors = ["Matt Chun-Lum <matt@questionable.engineering>"]
 edition = "2021"
 rust-version = "1.74.1"
 license = "MIT"
+repository = "https://github.com/mattcl/challengr-rs"
 
 [workspace.dependencies]
 derive_builder = "0.12.0"

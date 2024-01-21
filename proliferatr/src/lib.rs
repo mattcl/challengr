@@ -2,6 +2,7 @@
 use rand::Rng;
 
 pub mod generic;
+pub mod maze;
 
 /// Indicates that the implementing type can act as an input generator.
 ///
@@ -14,8 +15,10 @@ pub trait InputGenerator {
     type Output;
 
     /// Attempt to generate an input, optionally using the provided RNG.
-    fn gen_input<R: Rng + ?Sized>(&self, rng: &mut R)
-        -> Result<Self::Output, Self::GeneratorError>;
+    fn gen_input<R: Rng + Clone + ?Sized>(
+        &self,
+        rng: &mut R,
+    ) -> Result<Self::Output, Self::GeneratorError>;
 }
 
 /// Indicates that the implementing type can act as an input validator

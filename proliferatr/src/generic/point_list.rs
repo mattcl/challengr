@@ -1,7 +1,7 @@
 use std::{convert::Infallible, hash::BuildHasherDefault, ops::Range};
 
 use derive_builder::Builder;
-use rand::Rng;
+use rand::{distributions::Uniform, prelude::Distribution, Rng};
 use rustc_hash::FxHashSet;
 
 use crate::InputGenerator;
@@ -53,15 +53,17 @@ impl Point2List {
         Point2ListBuilder::default()
     }
 
-    pub fn gen_points<R: Rng + ?Sized>(&self, rng: &mut R) -> Vec<Point2> {
+    pub fn gen_points<R: Rng + Clone + ?Sized>(&self, rng: &mut R) -> Vec<Point2> {
         let num_points = rng.gen_range(self.num_points.clone());
+        let x_dist = Uniform::from(self.x_range.clone());
+        let y_dist = Uniform::from(self.y_range.clone());
 
         let mut seen: FxHashSet<Point2> =
             FxHashSet::with_capacity_and_hasher(num_points, BuildHasherDefault::default());
 
         while seen.len() < num_points {
-            let x = rng.gen_range(self.x_range.clone());
-            let y = rng.gen_range(self.y_range.clone());
+            let x = x_dist.sample(rng);
+            let y = y_dist.sample(rng);
 
             let p = Point2 { x, y };
             if seen.contains(&p) {
@@ -79,7 +81,7 @@ impl InputGenerator for Point2List {
     type GeneratorError = Infallible;
     type Output = Vec<Point2>;
 
-    fn gen_input<R: Rng + ?Sized>(
+    fn gen_input<R: Rng + Clone + ?Sized>(
         &self,
         rng: &mut R,
     ) -> Result<Self::Output, Self::GeneratorError> {
@@ -138,16 +140,19 @@ impl Point3List {
         Point3ListBuilder::default()
     }
 
-    pub fn gen_points<R: Rng + ?Sized>(&self, rng: &mut R) -> Vec<Point3> {
+    pub fn gen_points<R: Rng + Clone + ?Sized>(&self, rng: &mut R) -> Vec<Point3> {
         let num_points = rng.gen_range(self.num_points.clone());
+        let x_dist = Uniform::from(self.x_range.clone());
+        let y_dist = Uniform::from(self.y_range.clone());
+        let z_dist = Uniform::from(self.z_range.clone());
 
         let mut seen: FxHashSet<Point3> =
             FxHashSet::with_capacity_and_hasher(num_points, BuildHasherDefault::default());
 
         while seen.len() < num_points {
-            let x = rng.gen_range(self.x_range.clone());
-            let y = rng.gen_range(self.y_range.clone());
-            let z = rng.gen_range(self.y_range.clone());
+            let x = x_dist.sample(rng);
+            let y = y_dist.sample(rng);
+            let z = z_dist.sample(rng);
 
             let p = Point3 { x, y, z };
             if seen.contains(&p) {
@@ -165,7 +170,7 @@ impl InputGenerator for Point3List {
     type GeneratorError = Infallible;
     type Output = Vec<Point3>;
 
-    fn gen_input<R: Rng + ?Sized>(
+    fn gen_input<R: Rng + Clone + ?Sized>(
         &self,
         rng: &mut R,
     ) -> Result<Self::Output, Self::GeneratorError> {

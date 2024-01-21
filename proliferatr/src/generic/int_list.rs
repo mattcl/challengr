@@ -1,6 +1,7 @@
 use std::{convert::Infallible, ops::Range};
 
 use derive_builder::Builder;
+use rand::{distributions::Uniform, prelude::Distribution};
 use thiserror::Error;
 
 use crate::InputGenerator;
@@ -88,11 +89,10 @@ impl IntList {
     ///
     /// This allocates, but means we don't have to deal with the lifetime of the
     /// RNG. This _should_ be an okay-enough tradeoff.
-    pub fn gen_ints<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Vec<i64> {
+    pub fn gen_ints<R: rand::Rng + Clone + ?Sized>(&self, rng: &mut R) -> Vec<i64> {
         let num_ints = rng.gen_range(self.num_ints.clone());
-        (0..num_ints)
-            .map(|_| rng.gen_range(self.value_range.clone()))
-            .collect()
+        let uniform = Uniform::from(self.value_range.clone());
+        uniform.sample_iter(rng).take(num_ints).collect()
     }
 }
 
@@ -100,7 +100,7 @@ impl InputGenerator for IntList {
     type GeneratorError = Infallible;
     type Output = Vec<i64>;
 
-    fn gen_input<R: rand::Rng + ?Sized>(
+    fn gen_input<R: rand::Rng + Clone + ?Sized>(
         &self,
         rng: &mut R,
     ) -> Result<Self::Output, Self::GeneratorError> {
