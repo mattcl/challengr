@@ -17,9 +17,9 @@ const INST_PRIMES: &[usize] = &[
     317, 331, 337, 347,
 ];
 // anything goes but A and Z
-const CHARSET: &[u8] = b"BCDEFGHIJKLMNOPQRSTUVWXY";
 const P_CONTINUE_RUN: f64 = 0.70;
 const MAX_RUN: usize = 4;
+const ALPHA_CHARS: &[u8] = b"BCDFGHJKLMNPQRSTVWX";
 
 /// So the real inputs are very special, in that they describe six separate
 /// "loops" of nodes, where the cycle length in any loop from Z -> Z and A -> Z
@@ -122,8 +122,8 @@ impl InputGenerator for Day08 {
         for i in 1..lengths.len() {
             let start = loop {
                 let mut s = String::with_capacity(3);
-                s.push(CHARSET[rng.gen_range(0..CHARSET.len())] as char);
-                s.push(CHARSET[rng.gen_range(0..CHARSET.len())] as char);
+                s.push(ALPHA_CHARS[rng.gen_range(0..ALPHA_CHARS.len())] as char);
+                s.push(ALPHA_CHARS[rng.gen_range(0..ALPHA_CHARS.len())] as char);
                 s.push('A');
                 if !seen.contains(&s) {
                     seen.insert(s.clone());
@@ -132,8 +132,8 @@ impl InputGenerator for Day08 {
             };
             let end = loop {
                 let mut s = String::with_capacity(3);
-                s.push(CHARSET[rng.gen_range(0..CHARSET.len())] as char);
-                s.push(CHARSET[rng.gen_range(0..CHARSET.len())] as char);
+                s.push(ALPHA_CHARS[rng.gen_range(0..ALPHA_CHARS.len())] as char);
+                s.push(ALPHA_CHARS[rng.gen_range(0..ALPHA_CHARS.len())] as char);
                 s.push('Z');
                 if !seen.contains(&s) {
                     seen.insert(s.clone());
@@ -282,9 +282,9 @@ fn make_loop<R: Rng + Clone + ?Sized>(
 fn make_name<R: Rng + Clone + ?Sized>(rng: &mut R, seen: &mut HashSet<String>) -> String {
     loop {
         let mut s = String::with_capacity(3);
-        s.push(CHARSET[rng.gen_range(0..CHARSET.len())] as char);
-        s.push(CHARSET[rng.gen_range(0..CHARSET.len())] as char);
-        s.push(CHARSET[rng.gen_range(0..CHARSET.len())] as char);
+        s.push(ALPHA_CHARS[rng.gen_range(0..ALPHA_CHARS.len())] as char);
+        s.push(ALPHA_CHARS[rng.gen_range(0..ALPHA_CHARS.len())] as char);
+        s.push(ALPHA_CHARS[rng.gen_range(0..ALPHA_CHARS.len())] as char);
         if !seen.contains(&s) {
             seen.insert(s.clone());
             return s;

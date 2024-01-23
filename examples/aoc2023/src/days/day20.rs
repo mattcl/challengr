@@ -1,7 +1,10 @@
-use std::{collections::HashSet, convert::Infallible, fmt::Display};
+use std::{collections::HashSet, fmt::Display};
 
 use itertools::Itertools;
-use proliferatr::InputGenerator;
+use proliferatr::{
+    generic::{token::LOWER_ALPHA_CHARS, StringToken},
+    InputGenerator,
+};
 use rand::{seq::SliceRandom, Rng};
 
 use super::Day;
@@ -29,7 +32,6 @@ const PRIME_CHOICES: &[u32] = &[
 const NUM_ADDERS: usize = 4;
 const NUM_BITS: usize = 12;
 const KEY_LEN: usize = 2;
-const KEY_CHARS: &[u8] = b"abcdefghijklmnopqrstuvwxyz";
 
 /// We have 4, 12-bit adders that we're going to configure such that when they
 /// reach a particular 12-bit prime, will cause their conjunction to emit a low
@@ -46,19 +48,25 @@ impl Day for Day20 {
 }
 
 impl InputGenerator for Day20 {
-    type GeneratorError = Infallible;
+    type GeneratorError = anyhow::Error;
     type Output = String;
 
     fn gen_input<R: Rng + Clone + ?Sized>(
         &self,
         rng: &mut R,
     ) -> Result<Self::Output, Self::GeneratorError> {
+        let key_gen = StringToken::builder()
+            .length(KEY_LEN..=KEY_LEN)
+            .charset(LOWER_ALPHA_CHARS)
+            .build()
+            .unwrap();
+
         let desired_keys = (NUM_BITS + 2) * 4;
         let mut keys: Vec<String> = Vec::with_capacity(desired_keys);
         let mut seen_keys: HashSet<String> = HashSet::with_capacity(desired_keys + 3);
 
         seen_keys.insert("rx".into());
-        let final_key = make_key(rng);
+        let final_key = key_gen.gen_input(rng)?;
         seen_keys.insert(final_key.clone());
 
         let mut final_conjuction = Component::new(ComponentKind::Conjunction, &final_key);
@@ -71,7 +79,7 @@ impl InputGenerator for Day20 {
         let mut adders = Vec::with_capacity(NUM_ADDERS);
 
         while keys.len() < desired_keys {
-            let key = make_key(rng);
+            let key = key_gen.gen_input(rng)?;
             if seen_keys.contains(&key) {
                 continue;
             }
@@ -101,12 +109,6 @@ impl InputGenerator for Day20 {
 
         Ok(out.join("\n"))
     }
-}
-
-fn make_key<R: Rng + Clone + ?Sized>(rng: &mut R) -> String {
-    (0..KEY_LEN)
-        .map(|_| *KEY_CHARS.choose(rng).unwrap() as char)
-        .collect()
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

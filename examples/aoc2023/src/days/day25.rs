@@ -1,7 +1,10 @@
-use std::{collections::HashSet, convert::Infallible, fmt::Display, ops::Range};
+use std::{collections::HashSet, fmt::Display, ops::Range};
 
 use itertools::Itertools;
-use proliferatr::InputGenerator;
+use proliferatr::{
+    generic::{token::LOWER_ALPHA_CHARS, StringToken},
+    InputGenerator,
+};
 use rand::{
     distributions::Uniform,
     prelude::Distribution,
@@ -13,7 +16,6 @@ use super::Day;
 
 const NUM_NODES: Range<usize> = 750..821;
 const NAME_LEN: usize = 3;
-const CHARSET: &[u8] = b"abcdefghijklmnopqrstuvwxyz";
 const NUM_NEIGHBORS: Range<usize> = 4..7;
 const BI_DIRECTIONAL_PROB: f64 = 0.25;
 
@@ -35,19 +37,32 @@ impl Day for Day25 {
 }
 
 impl InputGenerator for Day25 {
-    type GeneratorError = Infallible;
+    type GeneratorError = anyhow::Error;
     type Output = Vec<Node>;
 
     fn gen_input<R: Rng + Clone + ?Sized>(
         &self,
         rng: &mut R,
     ) -> Result<Self::Output, Self::GeneratorError> {
+        let key_gen = StringToken::builder()
+            .length(NAME_LEN..=NAME_LEN)
+            .charset(LOWER_ALPHA_CHARS)
+            .build()
+            .unwrap();
+
         let left_count = rng.gen_range(NUM_NODES);
         let right_count = rng.gen_range(NUM_NODES);
         let mut seen = HashSet::with_capacity(2000);
         let mut raw_graph = Vec::with_capacity(left_count + right_count);
-        gen_graph(rng, left_count, 0, &mut seen, &mut raw_graph);
-        gen_graph(rng, right_count, left_count, &mut seen, &mut raw_graph);
+        gen_graph(rng, &key_gen, left_count, 0, &mut seen, &mut raw_graph)?;
+        gen_graph(
+            rng,
+            &key_gen,
+            right_count,
+            left_count,
+            &mut seen,
+            &mut raw_graph,
+        )?;
         let mut seen_edges: HashSet<(usize, usize)> = HashSet::default();
         let mut graph = Vec::with_capacity(left_count + right_count);
 
@@ -98,18 +113,15 @@ impl InputGenerator for Day25 {
 
 fn gen_graph<R: Rng + Clone + ?Sized>(
     rng: &mut R,
+    key_gen: &StringToken,
     count: usize,
     start_offset: usize,
     seen: &mut HashSet<String>,
     graph: &mut Vec<RawNode>,
-) {
+) -> anyhow::Result<()> {
     // make all the nodes
     while graph.len() < count + start_offset {
-        let mut name = String::with_capacity(3);
-        for _ in 0..NAME_LEN {
-            let idx = rng.gen_range(0..CHARSET.len());
-            name.push(CHARSET[idx] as char);
-        }
+        let name = key_gen.gen_input(rng)?;
 
         if seen.contains(&name) {
             continue;
@@ -149,6 +161,8 @@ fn gen_graph<R: Rng + Clone + ?Sized>(
             graph[nidx].neighbors.insert(i);
         }
     }
+
+    Ok(())
 }
 
 #[derive(Debug, Default, Clone)]

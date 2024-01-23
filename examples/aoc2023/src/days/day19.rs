@@ -1,19 +1,20 @@
 use std::{
     collections::{HashMap, HashSet},
-    convert::Infallible,
     fmt::Display,
     ops::Range,
 };
 
 use itertools::Itertools;
-use proliferatr::InputGenerator;
+use proliferatr::{
+    generic::{token::LOWER_ALPHA_CHARS, StringToken},
+    InputGenerator,
+};
 use rand::{seq::SliceRandom, Rng};
 
 use super::Day;
 
 const LAYER_SIZES: &[Range<usize>] = &[2..6, 9..15, 40..51, 100..110, 225..250];
 const KEY_SIZE: Range<usize> = 2..4;
-const KEY_CHARS: &[u8] = b"abcdefghijklmnopqrstuvwxyz";
 const XMAS: &[u8] = b"xmas";
 const VALUES: Range<u16> = 1..4001;
 const RULE_VALUES: Range<u16> = 1000..3001;
@@ -38,13 +39,19 @@ impl Day for Day19 {
 }
 
 impl InputGenerator for Day19 {
-    type GeneratorError = Infallible;
+    type GeneratorError = anyhow::Error;
     type Output = String;
 
     fn gen_input<R: Rng + Clone + ?Sized>(
         &self,
         rng: &mut R,
     ) -> Result<Self::Output, Self::GeneratorError> {
+        let key_gen = StringToken::builder()
+            .length(KEY_SIZE)
+            .charset(LOWER_ALPHA_CHARS)
+            .build()
+            .unwrap();
+
         let sizes = LAYER_SIZES
             .iter()
             .map(|r| rng.gen_range(r.clone()))
@@ -56,7 +63,7 @@ impl InputGenerator for Day19 {
         raw_keys.insert("in".into());
 
         while raw_keys.len() < total {
-            let candidate = make_key(rng);
+            let candidate = key_gen.gen_input(rng)?;
             if raw_keys.contains(&candidate) {
                 continue;
             }
@@ -148,13 +155,6 @@ impl InputGenerator for Day19 {
             ratings.iter().join("\n"),
         ))
     }
-}
-
-fn make_key<R: Rng + Clone + ?Sized>(rng: &mut R) -> String {
-    let len = rng.gen_range(KEY_SIZE);
-    (0..len)
-        .map(|_| *KEY_CHARS.choose(rng).unwrap() as char)
-        .collect()
 }
 
 #[derive(Debug, Default, Clone)]

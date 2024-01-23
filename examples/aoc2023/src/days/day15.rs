@@ -1,13 +1,15 @@
-use std::{collections::HashSet, convert::Infallible, fmt::Display, ops::Range};
+use std::{collections::HashSet, fmt::Display, ops::Range};
 
 use itertools::Itertools;
-use proliferatr::InputGenerator;
+use proliferatr::{
+    generic::{token::LOWER_ALPHA_CHARS, StringToken},
+    InputGenerator,
+};
 use rand::{seq::SliceRandom, Rng};
 
 use super::Day;
 
 const LENS_RANGE: Range<u8> = 1..10;
-const CHARSET: &[u8] = b"abcdefghijklmnopqrstuvwxyz";
 const NUM_UNIQUE_KEYS: Range<usize> = 500..601;
 const NUM_OPERATIONS: Range<usize> = 4000..5000;
 const KEY_LEN: Range<usize> = 2..7;
@@ -26,18 +28,24 @@ impl Day for Day15 {
 }
 
 impl InputGenerator for Day15 {
-    type GeneratorError = Infallible;
+    type GeneratorError = anyhow::Error;
     type Output = String;
 
     fn gen_input<R: Rng + Clone + ?Sized>(
         &self,
         rng: &mut R,
     ) -> Result<Self::Output, Self::GeneratorError> {
+        let key_gen = StringToken::builder()
+            .length(KEY_LEN)
+            .charset(LOWER_ALPHA_CHARS)
+            .build()
+            .unwrap();
+
         let num_keys = rng.gen_range(NUM_UNIQUE_KEYS);
         let mut keys = HashSet::with_capacity(num_keys);
 
         while keys.len() < num_keys {
-            let key = make_key(rng);
+            let key = key_gen.gen_input(rng)?;
             if keys.contains(&key) {
                 continue;
             }
@@ -67,13 +75,6 @@ impl InputGenerator for Day15 {
 
         Ok(instructions.iter().join(","))
     }
-}
-
-fn make_key<R: Rng + Clone + ?Sized>(rng: &mut R) -> String {
-    let len = rng.gen_range(KEY_LEN);
-    (0..len)
-        .map(|_| *CHARSET.choose(rng).unwrap() as char)
-        .collect()
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
