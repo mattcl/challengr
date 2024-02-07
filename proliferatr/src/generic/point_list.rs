@@ -4,7 +4,7 @@ use derive_builder::Builder;
 use rand::{distributions::Uniform, prelude::Distribution, Rng};
 use rustc_hash::FxHashSet;
 
-use crate::{InputGenerator, point::Point};
+use crate::{point::Point, InputGenerator};
 
 /// A type that can generate a unique list of random 2D Points.
 ///
