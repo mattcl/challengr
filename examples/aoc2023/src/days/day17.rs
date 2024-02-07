@@ -1,7 +1,6 @@
 use std::convert::Infallible;
 
-use itertools::Itertools;
-use proliferatr::InputGenerator;
+use proliferatr::{grid::DigitGrid, InputGenerator};
 use rand::{distributions::Uniform, prelude::Distribution, Rng};
 
 use super::Day;
@@ -19,27 +18,19 @@ impl Day for Day17 {
     fn generate<R: Rng + Clone + ?Sized>(
         rng: &mut R,
     ) -> Result<String, <Self as InputGenerator>::GeneratorError> {
-        Ok(Self
-            .gen_input(rng)?
-            .iter()
-            .map(|r| {
-                r.iter()
-                    .map(|c| char::from_digit(*c as u32, 10).unwrap())
-                    .collect::<String>()
-            })
-            .join("\n"))
+        Ok(Self.gen_input(rng)?.to_string())
     }
 }
 
 impl InputGenerator for Day17 {
     type GeneratorError = Infallible;
-    type Output = Vec<Vec<u8>>;
+    type Output = DigitGrid;
 
     fn gen_input<R: Rng + Clone + ?Sized>(
         &self,
         rng: &mut R,
     ) -> Result<Self::Output, Self::GeneratorError> {
-        let mut out = vec![vec![0; DIMENSION]; DIMENSION];
+        let mut out = DigitGrid::new(DIMENSION, DIMENSION, 0);
         let center = Location {
             row: CENTER,
             col: CENTER,

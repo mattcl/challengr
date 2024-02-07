@@ -1,7 +1,6 @@
 use std::{convert::Infallible, ops::Range};
 
-use itertools::Itertools;
-use proliferatr::InputGenerator;
+use proliferatr::{grid::CharGrid, InputGenerator};
 use rand::{distributions::Uniform, prelude::Distribution, Rng};
 
 use super::Day;
@@ -18,23 +17,19 @@ impl Day for Day11 {
     fn generate<R: Rng + Clone + ?Sized>(
         rng: &mut R,
     ) -> Result<String, <Self as InputGenerator>::GeneratorError> {
-        Ok(Self
-            .gen_input(rng)?
-            .iter()
-            .map(|r| r.iter().collect::<String>())
-            .join("\n"))
+        Ok(Self.gen_input(rng)?.to_string())
     }
 }
 
 impl InputGenerator for Day11 {
     type GeneratorError = Infallible;
-    type Output = Vec<Vec<char>>;
+    type Output = CharGrid;
 
     fn gen_input<R: Rng + Clone + ?Sized>(
         &self,
         rng: &mut R,
     ) -> Result<Self::Output, Self::GeneratorError> {
-        let mut out = vec![vec!['.'; DIMENSION]; DIMENSION];
+        let mut out = CharGrid::new(DIMENSION, DIMENSION, '.');
 
         let r_dist = Uniform::from(0..DIMENSION);
         let c_dist = Uniform::from(0..DIMENSION);
@@ -57,7 +52,7 @@ impl InputGenerator for Day11 {
     }
 }
 
-fn any_around(row: usize, col: usize, grid: &[Vec<char>]) -> bool {
+fn any_around(row: usize, col: usize, grid: &CharGrid) -> bool {
     for dr in -1..=1 {
         let r = row as i32 + dr;
         if r < 0 || r >= DIMENSION as i32 {

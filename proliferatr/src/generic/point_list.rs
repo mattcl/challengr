@@ -4,14 +4,7 @@ use derive_builder::Builder;
 use rand::{distributions::Uniform, prelude::Distribution, Rng};
 use rustc_hash::FxHashSet;
 
-use crate::InputGenerator;
-
-/// A Point in two dimensions denoted by x and y.
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Point2 {
-    pub x: i64,
-    pub y: i64,
-}
+use crate::{InputGenerator, point::Point};
 
 /// A type that can generate a unique list of random 2D Points.
 ///
@@ -53,19 +46,19 @@ impl Point2List {
         Point2ListBuilder::default()
     }
 
-    pub fn gen_points<R: Rng + Clone + ?Sized>(&self, rng: &mut R) -> Vec<Point2> {
+    pub fn gen_points<R: Rng + Clone + ?Sized>(&self, rng: &mut R) -> Vec<Point> {
         let num_points = rng.gen_range(self.num_points.clone());
         let x_dist = Uniform::from(self.x_range.clone());
         let y_dist = Uniform::from(self.y_range.clone());
 
-        let mut seen: FxHashSet<Point2> =
+        let mut seen: FxHashSet<Point> =
             FxHashSet::with_capacity_and_hasher(num_points, BuildHasherDefault::default());
 
         while seen.len() < num_points {
             let x = x_dist.sample(rng);
             let y = y_dist.sample(rng);
 
-            let p = Point2 { x, y };
+            let p = Point::new(x, y);
             if seen.contains(&p) {
                 continue;
             }
@@ -79,7 +72,7 @@ impl Point2List {
 
 impl InputGenerator for Point2List {
     type GeneratorError = Infallible;
-    type Output = Vec<Point2>;
+    type Output = Vec<Point>;
 
     fn gen_input<R: Rng + Clone + ?Sized>(
         &self,

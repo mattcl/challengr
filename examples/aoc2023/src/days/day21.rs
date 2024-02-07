@@ -1,7 +1,6 @@
 use std::{convert::Infallible, ops::Range};
 
-use itertools::Itertools;
-use proliferatr::InputGenerator;
+use proliferatr::{grid::CharGrid, InputGenerator};
 use rand::{distributions::Uniform, prelude::Distribution, Rng};
 
 use super::Day;
@@ -22,23 +21,19 @@ impl Day for Day21 {
     fn generate<R: Rng + Clone + ?Sized>(
         rng: &mut R,
     ) -> Result<String, <Self as proliferatr::InputGenerator>::GeneratorError> {
-        Ok(Day21
-            .gen_input(rng)?
-            .iter()
-            .map(|r| r.iter().collect::<String>())
-            .join("\n"))
+        Ok(Day21.gen_input(rng)?.to_string())
     }
 }
 
 impl InputGenerator for Day21 {
     type GeneratorError = Infallible;
-    type Output = Vec<Vec<char>>;
+    type Output = CharGrid;
 
     fn gen_input<R: Rng + Clone + ?Sized>(
         &self,
         rng: &mut R,
     ) -> Result<Self::Output, Self::GeneratorError> {
-        let mut out = vec![vec!['.'; DIMENSION]; DIMENSION];
+        let mut out = CharGrid::new(DIMENSION, DIMENSION, '.');
         // starting location
         out[CENTER][CENTER] = 'S';
 

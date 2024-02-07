@@ -1,7 +1,6 @@
 use std::{collections::VecDeque, ops::Range, str::FromStr};
 
-use itertools::Itertools;
-use proliferatr::InputGenerator;
+use proliferatr::{grid::CharGrid, InputGenerator};
 use rand::{distributions::Uniform, prelude::Distribution, Rng};
 use rustc_hash::FxHashMap;
 use thiserror::Error;
@@ -56,7 +55,7 @@ impl InputGenerator for Day14 {
             let num_square_rocks = rng.gen_range(NUM_SQUARE_ROCKS);
             let num_round_rocks = rng.gen_range(NUM_ROUND_ROCKS);
 
-            let mut grid = vec![vec!['.'; DIMENSION]; DIMENSION];
+            let mut grid = CharGrid::new(DIMENSION, DIMENSION, '.');
 
             // place squares
             let mut count = 0;
@@ -86,7 +85,7 @@ impl InputGenerator for Day14 {
                 count += 1;
             }
 
-            let output = grid.iter().map(|r| r.iter().collect::<String>()).join("\n");
+            let output = grid.to_string();
 
             let mut dish = BitDish::from_str(&output).unwrap();
             if dish

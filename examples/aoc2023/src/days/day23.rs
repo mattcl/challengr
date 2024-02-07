@@ -2,7 +2,8 @@ use std::{collections::VecDeque, convert::Infallible};
 
 use itertools::Itertools;
 use proliferatr::{
-    maze::{Direction, Grid, Location},
+    direction::Cardinal,
+    maze::{Location, MazeGrid},
     InputGenerator,
 };
 use rand::{seq::SliceRandom, Rng};
@@ -49,7 +50,13 @@ impl InputGenerator for Day23 {
         &self,
         rng: &mut R,
     ) -> Result<Self::Output, Self::GeneratorError> {
-        let mut grid = Grid::new(DIMENSION, DIMENSION);
+        let mut grid = MazeGrid::new(DIMENSION, DIMENSION);
+
+        let first_dir = if rng.gen_bool(0.5) {
+            Cardinal::South
+        } else {
+            Cardinal::East
+        };
 
         let (mut paths, junctions, mut occupied) = 'outer: loop {
             let mut occupied = vec![vec![false; DIMENSION]; DIMENSION];
@@ -75,7 +82,7 @@ impl InputGenerator for Day23 {
             if let Some(p) = initial_path(
                 &Location::default(),
                 &junctions[0][0],
-                Direction::East,
+                first_dir,
                 &mut occupied,
             ) {
                 paths.push(p);
@@ -90,7 +97,7 @@ impl InputGenerator for Day23 {
                         if let Some(p) = initial_path(
                             &junctions[row][col],
                             &junctions[row][col + 1],
-                            Direction::East,
+                            Cardinal::East,
                             &mut occupied,
                         ) {
                             paths.push(p);
@@ -103,7 +110,7 @@ impl InputGenerator for Day23 {
                         if let Some(p) = initial_path(
                             &junctions[row][col],
                             &junctions[row + 1][col],
-                            Direction::South,
+                            Cardinal::South,
                             &mut occupied,
                         ) {
                             paths.push(p);
@@ -114,6 +121,12 @@ impl InputGenerator for Day23 {
                 }
             }
 
+            let last_dir = if rng.gen_bool(0.5) {
+                Cardinal::South
+            } else {
+                Cardinal::East
+            };
+
             // path to the last exit
             if let Some(p) = initial_path(
                 &junctions[5][5],
@@ -121,7 +134,7 @@ impl InputGenerator for Day23 {
                     row: DIMENSION - 1,
                     col: DIMENSION - 1,
                 },
-                Direction::South,
+                last_dir,
                 &mut occupied,
             ) {
                 paths.push(p);
@@ -164,7 +177,7 @@ impl InputGenerator for Day23 {
                     continue;
                 }
 
-                if r > 0 {
+                if r > 0 || (c == 0 && first_dir == Cardinal::South) {
                     chars[row - 1][col] = 'v';
                 }
 
@@ -172,7 +185,7 @@ impl InputGenerator for Day23 {
                     chars[row + 1][col] = 'v';
                 }
 
-                if c > 0 {
+                if c > 0 || (r == 0 && first_dir == Cardinal::East) {
                     chars[row][col - 1] = '>';
                 }
 
@@ -195,17 +208,18 @@ impl InputGenerator for Day23 {
 fn initial_path(
     start: &Location,
     end: &Location,
-    dir: Direction,
+    dir: Cardinal,
     occupied: &mut [Vec<bool>],
 ) -> Option<PointPath> {
     let mut path = VecDeque::default();
     path.push_front(*start);
     occupied[start.row][start.col] = true;
+    occupied[end.row][end.col] = true;
 
     // we know because of our bounds for the junction locations, that these
     // operations are safe
     let (mut cur, end_target) = match dir {
-        Direction::East => (
+        Cardinal::East => (
             Location {
                 row: start.row,
                 col: start.col + 1,
@@ -215,7 +229,7 @@ fn initial_path(
                 col: end.col - 1,
             },
         ),
-        Direction::South => (
+        Cardinal::South => (
             Location {
                 row: start.row + 1,
                 col: start.col,
@@ -235,7 +249,7 @@ fn initial_path(
     path.push_back(cur);
 
     match dir {
-        Direction::East => {
+        Cardinal::East => {
             // move two units east
             for _ in 0..2 {
                 cur.col += 1;
@@ -270,7 +284,7 @@ fn initial_path(
                 occupied[cur.row][cur.col] = true;
             }
         }
-        Direction::South => {
+        Cardinal::South => {
             // move two units south
             for _ in 0..2 {
                 cur.row += 1;
@@ -334,11 +348,11 @@ impl PointPath {
             let alteration = ALTERATIONS.choose(rng).unwrap();
             match alteration {
                 Alt::Expand => match orient {
-                    Orientation::Vertical if p1.col > 1 => {
+                    Orientation::Vertical if p1.col > 0 => {
                         p1.col -= 1;
                         p2.col -= 1;
                     }
-                    Orientation::Horizontal if p1.row > 1 => {
+                    Orientation::Horizontal if p1.row > 0 => {
                         p1.row -= 1;
                         p2.row -= 1;
                     }

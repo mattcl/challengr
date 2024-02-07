@@ -1,8 +1,13 @@
 #![doc = include_str!("../README.md")]
 use rand::Rng;
 
+pub mod bound;
+pub mod direction;
 pub mod generic;
+pub mod grid;
 pub mod maze;
+pub mod path;
+pub mod point;
 
 /// Indicates that the implementing type can act as an input generator.
 ///

@@ -3,31 +3,14 @@ use std::fmt::Display;
 use itertools::Itertools;
 use rand::{seq::IteratorRandom, Rng};
 
-const LOC_CARD_NEIGHBOR_OFFSETS: [(Direction, i64, i64); 4] = [
-    (Direction::North, -1, 0),
-    (Direction::East, 0, 1),
-    (Direction::South, 1, 0),
-    (Direction::West, 0, -1),
+use crate::direction::Cardinal;
+
+const LOC_CARD_NEIGHBOR_OFFSETS: [(Cardinal, i64, i64); 4] = [
+    (Cardinal::North, -1, 0),
+    (Cardinal::East, 0, 1),
+    (Cardinal::South, 1, 0),
+    (Cardinal::West, 0, -1),
 ];
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum Direction {
-    North = 1,
-    South = 2,
-    East = 4,
-    West = 8,
-}
-
-impl Direction {
-    pub fn opposite(&self) -> Self {
-        match self {
-            Self::North => Self::South,
-            Self::South => Self::North,
-            Self::East => Self::West,
-            Self::West => Self::East,
-        }
-    }
-}
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Location {
@@ -45,7 +28,7 @@ impl From<(usize, usize)> for Location {
 }
 
 impl Location {
-    pub fn cardinal_neighbors(&self) -> impl Iterator<Item = (Direction, Location)> {
+    pub fn cardinal_neighbors(&self) -> impl Iterator<Item = (Cardinal, Location)> {
         let row = self.row;
         let col = self.col;
 
@@ -67,32 +50,32 @@ impl Location {
             })
     }
 
-    pub fn dir_to(&self, other: &Self) -> Direction {
+    pub fn dir_to(&self, other: &Self) -> Cardinal {
         if self.row == other.row {
             if self.col < other.col {
-                Direction::East
+                Cardinal::East
             } else {
-                Direction::West
+                Cardinal::West
             }
         } else {
             #[allow(clippy::collapsible_if)]
             if self.row < other.row {
-                Direction::South
+                Cardinal::South
             } else {
-                Direction::North
+                Cardinal::North
             }
         }
     }
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Grid {
+pub struct MazeGrid {
     pub cells: Vec<Vec<u8>>,
     pub width: usize,
     pub height: usize,
 }
 
-impl Grid {
+impl MazeGrid {
     pub fn new(width: usize, height: usize) -> Self {
         Self {
             cells: vec![vec![0; width]; height],
@@ -133,10 +116,7 @@ impl Grid {
         }
     }
 
-    pub fn neighbors(
-        &self,
-        loc: &Location,
-    ) -> impl Iterator<Item = (Direction, Location, u8)> + '_ {
+    pub fn neighbors(&self, loc: &Location) -> impl Iterator<Item = (Cardinal, Location, u8)> + '_ {
         loc.cardinal_neighbors()
             .filter(|(_, l)| self.contains(l))
             .map(|(d, l)| (d, l, self.cells[l.row][l.col]))
@@ -162,11 +142,11 @@ impl Grid {
 
                 output[r * 2 + 1][c * 2 + 1] = '.';
 
-                if v & Direction::East as u8 != 0 {
+                if v & Cardinal::East as u8 != 0 {
                     output[r * 2 + 1][c * 2 + 2] = '.';
                 }
 
-                if v & Direction::South as u8 != 0 {
+                if v & Cardinal::South as u8 != 0 {
                     output[r * 2 + 2][c * 2 + 1] = '.';
                 }
             }
@@ -176,7 +156,7 @@ impl Grid {
     }
 }
 
-impl Display for Grid {
+impl Display for MazeGrid {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.char_representation()
             .iter()
@@ -187,7 +167,7 @@ impl Display for Grid {
 }
 
 // slow, but just to test out the grid rendering
-pub fn aldos_broder<R: Rng + Clone + ?Sized>(rng: &mut R, grid: &mut Grid) {
+pub fn aldos_broder<R: Rng + Clone + ?Sized>(rng: &mut R, grid: &mut MazeGrid) {
     let mut unvisited = grid.size() - 1;
     let mut cell = grid.random_cell(rng);
     let mut cell_value = grid.get(&cell).unwrap();
