@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    # "challengr-api",
     "proliferatr",
 
     # https://github.com/rust-lang/cargo/issues/7467#issuecomment-1162137096
@@ -15,6 +16,7 @@ license = "MIT"
 repository = "https://github.com/mattcl/challengr-rs"
 
 [workspace.dependencies]
+clap = { version = "4.5", features = ["cargo", "derive", "env"] }
 derive_builder = "0.12.0"
 itertools = "0.12.0"
 nom = "7.1"
