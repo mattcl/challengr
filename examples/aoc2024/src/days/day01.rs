@@ -23,10 +23,7 @@ impl InputGenerator for Day01 {
     type GeneratorError = anyhow::Error;
     type Output = Vec<String>;
 
-    fn gen_input<R: Rng + Clone>(
-        &self,
-        rng: &mut R,
-    ) -> Result<Self::Output, Self::GeneratorError> {
+    fn gen_input<R: Rng + Clone>(&self, rng: &mut R) -> Result<Self::Output, Self::GeneratorError> {
         let left = IntList::builder()
             .value_range(10_000..100_000)
             .num_ints(NUM_VALUES..(NUM_VALUES + 1))

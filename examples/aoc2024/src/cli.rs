@@ -4,9 +4,7 @@ use anyhow::{bail, Result};
 use clap::Parser;
 use rand::thread_rng;
 
-use crate::days::{
-    Day, Day01
-};
+use crate::days::{Day, Day01, Day02};
 
 /// Generate an unofficial input for a given day for advent of code 2024.
 #[derive(Debug, Clone, Parser)]
@@ -24,7 +22,7 @@ impl Cli {
 
         let output = match cli.day {
             1 => Day01::generate(&mut rng)?,
-            // 2 => Day02::generate(&mut rng)?,
+            2 => Day02::generate(&mut rng)?,
             // 3 => Day03::generate(&mut rng)?,
             // 4 => Day04::generate(&mut rng)?,
             // 5 => Day05::generate(&mut rng)?,
